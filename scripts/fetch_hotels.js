@@ -152,6 +152,7 @@ async function fetchHotels() {
         // Veritabanını temizle ve yeni otelleri ekle
         await pool.query('TRUNCATE TABLE hotels RESTART IDENTITY');
 
+        // Otelleri ekle (geometri sütunu trigger ile otomatik doldurulacak)
         for (const hotel of topHotels) {
             await pool.query(
                 'INSERT INTO hotels (name, latitude, longitude, rating, address) VALUES ($1, $2, $3, $4, $5)',
@@ -160,11 +161,38 @@ async function fetchHotels() {
         }
 
         console.log(`${topHotels.length} otel başarıyla eklendi!`);
+
+        // Hava kalitesi noktalarını ekle
+        await pool.query('TRUNCATE TABLE air_quality_points RESTART IDENTITY');
+
+        // Her bölge için 200 rastgele nokta oluştur
+        for (let i = 0; i < 200; i++) {
+            const lat = ANTALYA_BOUNDS.minLat + (Math.random() * (ANTALYA_BOUNDS.maxLat - ANTALYA_BOUNDS.minLat));
+            const lng = ANTALYA_BOUNDS.minLng + (Math.random() * (ANTALYA_BOUNDS.maxLng - ANTALYA_BOUNDS.minLng));
+            const pollutionLevel = Math.floor(Math.random() * 300);
+            
+            // Kirlilik seviyesine göre renk belirle
+            let color;
+            if (pollutionLevel <= 100) {
+                color = '#90EE90';  // İyi - Açık yeşil
+            } else if (pollutionLevel <= 200) {
+                color = '#FFB6C1';  // Orta - Açık pembe
+            } else {
+                color = '#DDA0DD';  // Kötü - Açık mor
+            }
+
+            await pool.query(
+                'INSERT INTO air_quality_points (latitude, longitude, pollution_level, color) VALUES ($1, $2, $3, $4)',
+                [lat, lng, pollutionLevel, color]
+            );
+        }
+
+        console.log('200 hava kalitesi noktası başarıyla eklendi!');
+
     } catch (error) {
         console.error('Hata:', error);
     } finally {
         await pool.end();
     }
 }
-
 fetchHotels(); 

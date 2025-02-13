@@ -16,6 +16,7 @@ const pool = new Pool({
 
 // Statik dosyaları serve et
 app.use(express.static('public'));
+app.use('/tiles', express.static('tiles')); // Tile'lar için yeni statik klasör
 app.use(express.json());
 
 // Ana sayfa

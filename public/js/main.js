@@ -15,7 +15,7 @@ const ANTALYA_CENTER = [
 const basemaps = {
     "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        opacity: 0.6 // Harita altlığını şeffaflaştır
+        opacity: 0.6
     }),
     "Uydu Görüntüsü": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: '© Esri',
@@ -24,6 +24,17 @@ const basemaps = {
     "Koyu Tema": L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
         attribution: '© CartoDB',
         opacity: 0.7
+    }),
+    "Özel Harita": L.tileLayer('/tiles/Mapnik/{z}/{x}/{y}.png', {
+        attribution: 'QGIS ile Oluşturuldu',
+        opacity: 1,
+        maxZoom: 20,
+        minZoom: 12,
+        tms: false,
+        bounds: [
+            [ANTALYA_BOUNDS.minLat, ANTALYA_BOUNDS.minLng],
+            [ANTALYA_BOUNDS.maxLat, ANTALYA_BOUNDS.maxLng]
+        ]
     })
 };
 
@@ -32,7 +43,7 @@ const map = L.map('map', {
     center: ANTALYA_CENTER,
     zoom: 12,
     zoomControl: false,
-    layers: [basemaps["OpenStreetMap"]], // Varsayılan altlık
+    layers: [basemaps["Özel Harita"]], // Varsayılan olarak özel haritayı göster
     maxBounds: [
         [ANTALYA_BOUNDS.minLat - 0.1, ANTALYA_BOUNDS.minLng - 0.1],
         [ANTALYA_BOUNDS.maxLat + 0.1, ANTALYA_BOUNDS.maxLng + 0.1]
@@ -44,9 +55,15 @@ L.control.zoom({
     position: 'topright'
 }).addTo(map);
 
-// Altlık seçiciyi sağ üste ekle
-L.control.layers(basemaps, null, {
-    position: 'topright'
+// Altlık seçicisini düzenle ve ekle
+const layerControl = L.control.layers({
+    "OpenStreetMap": basemaps["OpenStreetMap"],
+    "Uydu Görüntüsü": basemaps["Uydu Görüntüsü"],
+    "Koyu Tema": basemaps["Koyu Tema"],
+    "Özel Harita": basemaps["Özel Harita"]
+}, null, {
+    position: 'topright',
+    collapsed: false // Kontrol panelini açık tut
 }).addTo(map);
 
 // Harita sınırlarına göre görünümü ayarla
