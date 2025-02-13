@@ -99,21 +99,41 @@ async function fetchHotels() {
                     if (element.tags.stars) {
                         stars = parseInt(element.tags.stars);
                     } else {
-                        // Tesis tipine göre varsayılan yıldız
-                        switch(element.tags.tourism) {
-                            case 'resort':
-                                stars = 5; // Resort'lar genelde 5 yıldızlı
-                                break;
-                            case 'apartment':
-                                stars = 3; // Apart oteller genelde 3 yıldızlı
-                                break;
-                            case 'guest_house':
-                                stars = 3; // Butik oteller genelde 3 yıldızlı
-                                break;
-                            default:
-                                stars = Math.floor(Math.random() * 3) + 3; // 3-5 arası rastgele
+                        // Tesis tipine ve diğer özelliklere göre yıldız belirle
+                        if (element.tags.tourism === 'resort' || 
+                            element.tags.name?.toLowerCase().includes('resort') ||
+                            element.tags.name?.toLowerCase().includes('deluxe') ||
+                            element.tags.name?.toLowerCase().includes('premium') ||
+                            element.tags.name?.toLowerCase().includes('luxury')) {
+                            stars = Math.random() < 0.7 ? 5 : 4; // %70 ihtimalle 5 yıldız
+                        } else if (element.tags.tourism === 'hotel' || 
+                                   element.tags.building === 'hotel') {
+                            // Normal oteller için dengeli dağılım
+                            const rand = Math.random();
+                            if (rand < 0.2) stars = 5;      // %20 ihtimalle 5 yıldız
+                            else if (rand < 0.5) stars = 4;  // %30 ihtimalle 4 yıldız
+                            else if (rand < 0.8) stars = 3;  // %30 ihtimalle 3 yıldız
+                            else stars = 2;                  // %20 ihtimalle 2 yıldız
+                        } else if (element.tags.tourism === 'apartment' ||
+                                   element.tags.name?.toLowerCase().includes('apart')) {
+                            stars = Math.random() < 0.7 ? 3 : 2; // %70 ihtimalle 3 yıldız
+                        } else if (element.tags.tourism === 'guest_house' ||
+                                   element.tags.tourism === 'hostel' ||
+                                   element.tags.name?.toLowerCase().includes('pension') ||
+                                   element.tags.name?.toLowerCase().includes('pansiyon')) {
+                            stars = Math.random() < 0.3 ? 3 : 2; // %30 ihtimalle 3 yıldız
+                        } else {
+                            // Diğer durumlar için varsayılan dağılım
+                            const rand = Math.random();
+                            if (rand < 0.1) stars = 5;      // %10 ihtimalle 5 yıldız
+                            else if (rand < 0.3) stars = 4;  // %20 ihtimalle 4 yıldız
+                            else if (rand < 0.7) stars = 3;  // %40 ihtimalle 3 yıldız
+                            else stars = 2;                  // %30 ihtimalle 2 yıldız
                         }
                     }
+                    
+                    // Yıldız sayısını 2-5 arasında sınırla
+                    stars = Math.max(2, Math.min(5, stars));
                     
                     // Adres bilgisini birleştir
                     let address = element.tags['addr:street'];
@@ -144,23 +164,53 @@ async function fetchHotels() {
             return acc;
         }, new Map());
 
-        // En iyi 100 oteli seç (yıldız sayısına ve konum çeşitliliğine göre)
-        const topHotels = Array.from(uniqueHotels.values())
-            .sort((a, b) => b.rating - a.rating)
-            .slice(0, 100);
+        // Otelleri yıldız sayılarına göre grupla
+        const hotelsByRating = Array.from(uniqueHotels.values()).reduce((acc, hotel) => {
+            if (!acc[hotel.rating]) {
+                acc[hotel.rating] = [];
+            }
+            acc[hotel.rating].push(hotel);
+            return acc;
+        }, {});
+
+        // Her yıldız seviyesinden dengeli sayıda otel seç
+        const targetCounts = {
+            5: 20, // 5 yıldızlı oteller için hedef sayı
+            4: 30, // 4 yıldızlı oteller için hedef sayı
+            3: 30, // 3 yıldızlı oteller için hedef sayı
+            2: 20  // 2 yıldızlı oteller için hedef sayı
+        };
+
+        const selectedHotels = [];
+        Object.entries(targetCounts).forEach(([rating, targetCount]) => {
+            const hotelsOfRating = hotelsByRating[rating] || [];
+            // Her kategoriden rastgele otel seç
+            const shuffled = hotelsOfRating.sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, targetCount);
+            selectedHotels.push(...selected);
+        });
+
+        // Eğer 100 otele ulaşamadıysak, eksik kalan kısmı diğer otellerden rastgele seç
+        if (selectedHotels.length < 100) {
+            const remaining = Array.from(uniqueHotels.values())
+                .filter(hotel => !selectedHotels.includes(hotel))
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 100 - selectedHotels.length);
+            selectedHotels.push(...remaining);
+        }
 
         // Veritabanını temizle ve yeni otelleri ekle
         await pool.query('TRUNCATE TABLE hotels RESTART IDENTITY');
 
         // Otelleri ekle (geometri sütunu trigger ile otomatik doldurulacak)
-        for (const hotel of topHotels) {
+        for (const hotel of selectedHotels) {
             await pool.query(
                 'INSERT INTO hotels (name, latitude, longitude, rating, address) VALUES ($1, $2, $3, $4, $5)',
                 [hotel.name, hotel.latitude, hotel.longitude, hotel.rating, hotel.address]
             );
         }
 
-        console.log(`${topHotels.length} otel başarıyla eklendi!`);
+        console.log(`${selectedHotels.length} otel başarıyla eklendi!`);
 
         // Hava kalitesi noktalarını ekle
         await pool.query('TRUNCATE TABLE air_quality_points RESTART IDENTITY');

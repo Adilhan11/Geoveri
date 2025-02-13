@@ -190,9 +190,9 @@ async function loadData() {
             }
         });
 
-        // Varsayılan olarak heatmap'i göster
-        map.addLayer(heatmapLayer);
-        document.getElementById('showAirQuality').classList.add('active');
+        // Varsayılan olarak heatmap'i gösterme
+        // map.addLayer(heatmapLayer);
+        // document.getElementById('showAirQuality').classList.add('active');
 
     } catch (error) {
         console.error('Veri yükleme hatası:', error);
