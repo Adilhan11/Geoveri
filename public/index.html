@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antalya Hava Kalitesi Haritası</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="header">
+                <h1>Antalya</h1>
+                <p class="subtitle">Hava Kalitesi ve Otel Haritası</p>
+            </div>
+
+            <div class="controls-section">
+                <div class="data-controls">
+                    <button id="showHotels" class="secondary-button">
+                        🏨 Otelleri Göster
+                    </button>
+                    <button id="showAirQuality" class="secondary-button">
+                        🌬️ Hava Kalitesi Verilerini Göster
+                    </button>
+                </div>
+
+                <div class="search-radius">
+                    <label for="radius">Arama Yarıçapı</label>
+                    <div class="input-group">
+                        <input type="number" id="radius" value="2" min="0.5" max="10" step="0.5">
+                        <span class="unit">km</span>
+                    </div>
+                </div>
+                <button id="findBestHotel" class="primary-button">En Uygun Oteli Bul</button>
+            </div>
+
+            <div class="legend">
+                <h3>Hava Kalitesi Seviyeleri</h3>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <span class="color-box good"></span>
+                        <span>İyi (0-100)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box moderate"></span>
+                        <span>Orta (101-200)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="color-box bad"></span>
+                        <span>Kötü (201+)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 
