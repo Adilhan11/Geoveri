@@ -14,13 +14,16 @@ const ANTALYA_CENTER = [
 // Harita altlıkları
 const basemaps = {
     "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: '© OpenStreetMap contributors',
+        opacity: 0.6 // Harita altlığını şeffaflaştır
     }),
     "Uydu Görüntüsü": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: '© Esri'
+        attribution: '© Esri',
+        opacity: 0.6
     }),
     "Koyu Tema": L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
-        attribution: '© CartoDB'
+        attribution: '© CartoDB',
+        opacity: 0.7
     })
 };
 
@@ -54,7 +57,8 @@ map.fitBounds([
 
 // Katman grupları
 const hotelLayer = L.layerGroup();
-const airQualityLayer = L.layerGroup();
+let heatmapLayer = null;
+let searchRadiusCircle = null;
 
 // Verileri API'den al ve haritaya ekle
 async function loadData() {
@@ -90,26 +94,89 @@ async function loadData() {
             hotelLayer.addLayer(marker);
         });
 
-        // Hava kalitesi noktalarını haritaya ekle
-        airQualityPoints.forEach(point => {
-            const circle = L.circle([point.latitude, point.longitude], {
-                color: point.color,
-                fillColor: point.color,
-                fillOpacity: 0.6,
-                radius: 250,
-                weight: 1
+        // Interpolasyon için yardımcı fonksiyon
+        function interpolatePoints(points) {
+            const interpolatedPoints = [];
+            const gridSize = 0.005; // Yaklaşık 500m aralıklarla grid oluştur
+
+            // Grid noktaları oluştur
+            for (let lat = ANTALYA_BOUNDS.minLat; lat <= ANTALYA_BOUNDS.maxLat; lat += gridSize) {
+                for (let lng = ANTALYA_BOUNDS.minLng; lng <= ANTALYA_BOUNDS.maxLng; lng += gridSize) {
+                    let totalWeight = 0;
+                    let weightedPollution = 0;
+
+                    // Her grid noktası için çevredeki gerçek noktaların ağırlıklı ortalamasını al
+                    points.forEach(point => {
+                        const distance = calculateDistance(lat, lng, point.latitude, point.longitude);
+                        if (distance <= 2) { // 2km yarıçap içindeki noktaları kullan
+                            const weight = 1 / Math.pow(distance + 0.1, 2); // Mesafeye bağlı ağırlık (0.1 offset ile 0'a bölünmeyi önle)
+                            totalWeight += weight;
+                            weightedPollution += point.pollution_level * weight;
+                        }
+                    });
+
+                    // Eğer yakında veri noktası varsa interpolasyon yap
+                    if (totalWeight > 0) {
+                        const interpolatedValue = weightedPollution / totalWeight;
+                        interpolatedPoints.push({
+                            latitude: lat,
+                            longitude: lng,
+                            pollution_level: interpolatedValue
+                        });
+                    }
+                }
+            }
+
+            // Orijinal noktaları da ekle (daha yüksek ağırlıkla)
+            points.forEach(point => {
+                interpolatedPoints.push({
+                    latitude: point.latitude,
+                    longitude: point.longitude,
+                    pollution_level: point.pollution_level,
+                    isOriginal: true
+                });
             });
 
-            circle.bindPopup(`
-                <div class="air-quality-popup">
-                    <b>Hava Kalitesi</b>
-                    <p>Seviye: ${point.pollution_level}</p>
-                    <p>Durum: ${getAirQualityText(point.pollution_level)}</p>
-                </div>
-            `);
+            return interpolatedPoints;
+        }
 
-            airQualityLayer.addLayer(circle);
+        // Noktaları interpole et
+        const interpolatedPoints = interpolatePoints(airQualityPoints);
+
+        // Hava kalitesi verilerini heatmap'e dönüştür
+        const heatmapData = interpolatedPoints.map(point => {
+            // Kirlilik seviyesini 0-1 arasına normalize et
+            const intensity = point.pollution_level / 300;
+            // Orijinal noktalar için daha yüksek ağırlık kullan
+            const weight = point.isOriginal ? 1.5 : 0.7;
+            return [point.latitude, point.longitude, intensity * weight];
         });
+
+        // Eğer varsa eski heatmap'i kaldır
+        if (heatmapLayer) {
+            map.removeLayer(heatmapLayer);
+        }
+
+        // Yeni heatmap'i oluştur
+        heatmapLayer = L.heatLayer(heatmapData, {
+            radius: 30,      // Biraz daha geniş radius
+            blur: 20,        // Biraz daha fazla blur ile yumuşak geçiş
+            maxZoom: 15,
+            minOpacity: 0.5, // Minimum opaklığı artır
+            max: 1.0,        
+            gradient: {
+                0.0: 'rgb(0, 255, 0)',     // Parlak yeşil (İyi)
+                0.3: 'rgb(255, 255, 0)',   // Sarı
+                0.5: 'rgb(255, 170, 0)',   // Turuncu
+                0.7: 'rgb(255, 80, 80)',   // Açık kırmızı
+                1.0: 'rgb(255, 0, 0)'      // Koyu kırmızı (Kötü)
+            }
+        });
+
+        // Varsayılan olarak heatmap'i göster
+        map.addLayer(heatmapLayer);
+        document.getElementById('showAirQuality').classList.add('active');
+
     } catch (error) {
         console.error('Veri yükleme hatası:', error);
         showNotification('Veriler yüklenirken bir hata oluştu!');
@@ -131,10 +198,10 @@ document.getElementById('showHotels').addEventListener('click', function() {
 
 document.getElementById('showAirQuality').addEventListener('click', function() {
     this.classList.toggle('active');
-    if (map.hasLayer(airQualityLayer)) {
-        map.removeLayer(airQualityLayer);
+    if (map.hasLayer(heatmapLayer)) {
+        map.removeLayer(heatmapLayer);
     } else {
-        map.addLayer(airQualityLayer);
+        map.addLayer(heatmapLayer);
     }
 });
 
@@ -148,8 +215,33 @@ map.on('click', function(e) {
     if (locationMarker) {
         map.removeLayer(locationMarker);
     }
+    if (searchRadiusCircle) {
+        map.removeLayer(searchRadiusCircle);
+    }
+    
     selectedLocation = [e.latlng.lat, e.latlng.lng];
+    
+    // Konum işaretçisini ekle
     locationMarker = L.marker(selectedLocation).addTo(map);
+    
+    // Arama yarıçapını görselleştir
+    const radius = parseFloat(document.getElementById('radius').value) * 1000; // km'yi metreye çevir
+    searchRadiusCircle = L.circle(selectedLocation, {
+        radius: radius,
+        color: '#3498db',
+        fillColor: '#3498db',
+        fillOpacity: 0.1,
+        weight: 2,
+        dashArray: '5, 10'
+    }).addTo(map);
+});
+
+// Yarıçap değiştiğinde görselleştirmeyi güncelle
+document.getElementById('radius').addEventListener('input', function() {
+    if (selectedLocation && searchRadiusCircle) {
+        const radius = parseFloat(this.value) * 1000; // km'yi metreye çevir
+        searchRadiusCircle.setRadius(radius);
+    }
 });
 
 // En uygun oteli bulan fonksiyon

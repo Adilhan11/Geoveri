@@ -110,10 +110,12 @@ body {
 }
 
 .legend {
-    background: #f8f9fa;
+    background: rgba(248, 249, 250, 0.9);
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 0;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .legend h3 {
@@ -141,19 +143,28 @@ body {
     width: 20px;
     height: 20px;
     border-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.color-box:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px currentColor;
 }
 
 .color-box.good {
-    background-color: #90EE90;
+    background: rgb(0, 255, 0);  /* Parlak yeşil */
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
 }
 
 .color-box.moderate {
-    background-color: #FFB6C1;
+    background: rgb(255, 170, 0);  /* Turuncu */
+    box-shadow: 0 0 5px rgba(255, 170, 0, 0.5);
 }
 
 .color-box.bad {
-    background-color: #DDA0DD;
+    background: rgb(255, 0, 0);  /* Kırmızı */
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
 }
 
 /* Popup stilleri */
