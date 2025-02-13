@@ -58,7 +58,3 @@ npm start
 - 🟠 Hassas (101-150)
 - 🔴 Sağlıksız (151-200)
 - 🟣 Çok Sağlıksız (201+)
-
-## Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır. 
