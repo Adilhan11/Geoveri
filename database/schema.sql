@@ -59,4 +59,4 @@ CREATE TRIGGER update_air_quality_geom
     BEFORE INSERT OR UPDATE OF latitude, longitude
     ON air_quality_points
     FOR EACH ROW
-    EXECUTE FUNCTION update_geom_column(); 
+    EXECUTE FUNCTION update_geom_column();

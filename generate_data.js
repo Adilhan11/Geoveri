@@ -101,6 +101,7 @@ hotels.forEach(hotel => {
         lng = 30.70 + (Math.random() * 0.1);
     }
     
+    
     hotel.latitude = lat;
     hotel.longitude = lng;
 });
