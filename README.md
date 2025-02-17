@@ -20,7 +20,6 @@
 - [API Dökümantasyonu](#-api-dökümantasyonu)
 - [Katkıda Bulunma](#-katkıda-bulunma)
 - [Lisans](#-lisans)
-- [Veri İşleme ve Görselleştirme](#-veri-işleme-ve-görselleştirme)
 
 ## 🎯 Proje Hakkında
 
@@ -40,7 +39,7 @@ Bu proje, Antalya'daki hava kalitesi verilerini gerçek zamanlı olarak harita �
 
 - **Frontend**:
   - HTML5 & CSS3
-  - JavaScript 
+  - JavaScript (ES6+)
   - Leaflet.js (Harita görselleştirme)
   
 - **Backend**:
@@ -50,7 +49,7 @@ Bu proje, Antalya'daki hava kalitesi verilerini gerçek zamanlı olarak harita �
   
 - **Araçlar & Kütüphaneler**:
   - node-fetch
-  - PostGIS
+  - pg (PostgreSQL client)
 
 ## 🚀 Başlangıç
 
@@ -136,7 +135,3 @@ npm start
   
 - `POST /api/find-hotel`
   - Verilen konum ve yarıçapa göre en uygun oteli bulur
-
-## 📊 Veri İşleme ve Görselleştirme
-
-Bu projede, QGIS yazılımı ve IDW (Inverse Distance Weighting) aracı kullanılarak raster görüntüler elde edilmiştir. Bu görüntüler, farklı zoom seviyelerine göre tile edilerek harita üzerinde daha etkili bir görselleştirme sağlanmıştır. Bu süreç, kullanıcıların harita üzerinde daha detaylı ve dinamik bir deneyim yaşamasını sağlamaktadır.
