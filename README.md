@@ -1,36 +1,93 @@
-# Antalya Hava Kalitesi ve Otel Haritası
+# 🌍 Antalya Hava Kalitesi ve Otel Haritası
 
-Bu proje, Antalya'daki hava kirliliği seviyelerini harita üzerinde görselleştiren ve kullanıcılara bulundukları konuma göre en uygun oteli öneren bir web uygulamasıdır.
+<div align="center">
 
-## Özellikler
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node.js](https://img.shields.io/badge/Node.js-v14+-green.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v13+-blue.svg)
 
-- Antalya'daki hava kirliliği seviyelerini harita üzerinde renkli noktalarla gösterir
-- Şehirdeki otellerin konumlarını harita üzerinde işaretler
-- Kullanıcının seçtiği konuma ve yarıçapa göre en uygun oteli bulur
-- Hava kalitesi ve mesafe faktörlerini göz önünde bulundurarak otel önerir
+</div>
 
-## Teknolojiler
+## 📋 İçerik Tablosu
+- [Proje Hakkında](#-proje-hakkında)
+- [Özellikler](#-özellikler)
+- [Teknoloji Yığını](#-teknoloji-yığını)
+- [Başlangıç](#-başlangıç)
+  - [Ön Gereksinimler](#ön-gereksinimler)
+  - [Kurulum](#kurulum)
+- [Kullanım](#-kullanım)
+- [Hava Kalitesi Göstergeleri](#-hava-kalitesi-göstergeleri)
+- [API Dökümantasyonu](#-api-dökümantasyonu)
+- [Katkıda Bulunma](#-katkıda-bulunma)
+- [Lisans](#-lisans)
 
-- Frontend: HTML, CSS, JavaScript, Leaflet.js
-- Backend: Node.js, Express.js
-- Veritabanı: PostgreSQL
+## 🎯 Proje Hakkında
 
-## Kurulum
+Bu proje, Antalya'daki hava kalitesi verilerini gerçek zamanlı olarak harita üzerinde görselleştiren ve kullanıcılara konuma dayalı akıllı otel önerileri sunan interaktif bir web uygulamasıdır. Turistler ve yerel halk için hava kalitesi bilinci oluşturmayı ve konforlu konaklama seçenekleri sunmayı hedeflemektedir.
 
-1. PostgreSQL'i yükleyin ve çalıştırın
+## ✨ Özellikler
 
-2. Veritabanını oluşturun:
+- 🗺️ Antalya'nın detaylı interaktif haritası
+- 📍 Gerçek zamanlı hava kalitesi göstergeleri
+- 🏨 Akıllı otel öneri sistemi
+- 📏 Özelleştirilebilir arama yarıçapı (0.5 km - 10 km)
+- 📱 Mobil uyumlu tasarım
+- 🔄 Otomatik veri güncelleme
+- 📊 Detaylı hava kalitesi istatistikleri
+
+## 🛠 Teknoloji Yığını
+
+- **Frontend**:
+  - HTML5 & CSS3
+  - JavaScript (ES6+)
+  - Leaflet.js (Harita görselleştirme)
+  
+- **Backend**:
+  - Node.js
+  - Express.js
+  - PostgreSQL
+  
+- **Araçlar & Kütüphaneler**:
+  - node-fetch
+  - pg (PostgreSQL client)
+
+## 🚀 Başlangıç
+
+### Ön Gereksinimler
+
+- Node.js 
+- PostgreSQL 
+- npm 
+
+### Kurulum
+
+1. Projeyi klonlayın:
+```bash
+git clone https://github.com/kullaniciadi/antalya-air-quality.git
+cd antalya-air-quality
+```
+
+2. PostgreSQL'i kurun ve veritabanını oluşturun:
 ```bash
 psql -U postgres -f database/schema.sql
 ```
 
-3. Gerekli Node.js paketlerini yükleyin:
+3. Bağımlılıkları yükleyin:
 ```bash
 npm install
 ```
 
-4. Veritabanı bağlantı bilgilerini güncelleyin:
-   - `server.js` ve `generate_data.js` dosyalarındaki PostgreSQL bağlantı bilgilerini kendi sisteminize göre düzenleyin.
+4. Veritabanı yapılandırmasını düzenleyin:
+   `server.js` ve `generate_data.js` dosyalarındaki PostgreSQL bağlantı bilgilerini güncelleyin:
+```javascript
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'antalya_air_quality',
+    password: 'your_password',
+    port: 5432,
+});
+```
 
 5. Örnek verileri oluşturun:
 ```bash
@@ -42,19 +99,39 @@ node generate_data.js
 npm start
 ```
 
-7. Tarayıcınızda `http://localhost:3000` adresine gidin
+7. Tarayıcınızda `http://localhost:3000` adresini açın
 
-## Kullanım
+## 💡 Kullanım
 
-1. Harita üzerinde istediğiniz bir konumu tıklayın
-2. Arama yarıçapını ayarlayın (0.5 km - 10 km arası)
-3. "En Uygun Oteli Bul" butonuna tıklayın
-4. Sistem, seçilen konum çevresindeki en uygun oteli bulup gösterecektir
+1. **Konum Seçimi**
+   - Harita üzerinde istediğiniz konumu tıklayın
+   - Arama yarıçapını kaydırıcı ile ayarlayın
 
-## Hava Kalitesi Seviyeleri
+2. **Otel Arama**
+   - "En Uygun Oteli Bul" butonuna tıklayın
+   - Sistem, hava kalitesi ve mesafe faktörlerini değerlendirerek en uygun oteli gösterecektir
 
-- 🟢 İyi (0-50)
-- 🟡 Orta (51-100)
-- 🟠 Hassas (101-150)
-- 🔴 Sağlıksız (151-200)
-- 🟣 Çok Sağlıksız (201+)
+3. **Hava Kalitesi Görüntüleme**
+   - Harita üzerindeki renkli noktalar hava kalitesi seviyelerini gösterir
+   - Noktalara tıklayarak detaylı bilgi alabilirsiniz
+
+## 🌈 Hava Kalitesi Göstergeleri
+
+| Renk | Seviye | AQI Değeri | Sağlık Etkisi |
+|------|---------|------------|----------------|
+| 🟢 | İyi | 0-50 | Hava kalitesi tatmin edici |
+| 🟡 | Orta | 51-100 | Hassas gruplar için orta düzey risk |
+| 🔴 | Hassas | 101-150 |  Herkes için sağlıksız |
+
+## 📚 API Dökümantasyonu
+
+### Endpoints
+
+- `GET /api/air-quality`
+  - Tüm hava kalitesi ölçüm noktalarını döndürür
+  
+- `GET /api/hotels`
+  - Tüm otel listesini döndürür
+  
+- `POST /api/find-hotel`
+  - Verilen konum ve yarıçapa göre en uygun oteli bulur
