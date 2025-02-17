@@ -18,6 +18,8 @@
 - [Kullanım](#-kullanım)
 - [Hava Kalitesi Göstergeleri](#-hava-kalitesi-göstergeleri)
 - [API Dökümantasyonu](#-api-dökümantasyonu)
+- [Veri Hazırlama ve İşleme Süreci](#-veri-hazırlama-ve-işleme-süreci)
+  - [QGIS ve IDW Analizi](#qgis-ve-idw-analizi)
 - [Katkıda Bulunma](#-katkıda-bulunma)
 - [Lisans](#-lisans)
 
@@ -135,3 +137,31 @@ npm start
   
 - `POST /api/find-hotel`
   - Verilen konum ve yarıçapa göre en uygun oteli bulur
+
+## 🗺️ Veri Hazırlama ve İşleme Süreci
+
+### QGIS ve IDW Analizi
+
+Projemizde hava kalitesi verilerinin görselleştirilmesi için aşağıdaki adımlar izlenmiştir:
+
+1. **IDW (Inverse Distance Weighting) Analizi**
+   - QGIS'te hava kalitesi ölçüm noktaları için IDW interpolasyon yöntemi kullanıldı
+   - Bu yöntem, ölçüm noktaları arasındaki boşlukları tahminleyerek sürekli bir yüzey oluşturdu
+   - Yakın noktaların uzak noktalara göre daha fazla ağırlığa sahip olduğu bir hesaplama yapıldı
+
+2. **Raster Görüntü İşleme**
+   - IDW analizi sonucunda elde edilen raster görüntüler işlendi
+   - Farklı zoom seviyeleri için optimize edildi
+   - Raster veriler, web haritası için uygun formatta tile'lara bölündü
+
+3. **Tile Üretimi**
+   - Raster görüntüler farklı zoom seviyeleri (z8-z16) için tile'lara ayrıldı
+   - Her zoom seviyesi için uygun çözünürlükte görüntüler oluşturuldu
+   - Tile'lar {z}/{x}/{y} formatında organize edildi
+
+4. **Veri Optimizasyonu**
+   - Tile boyutları web performansı için optimize edildi
+   - Gereksiz detay seviyelerinden kaçınıldı
+   - Veri boyutu ve görsel kalite arasında optimum denge sağlandı
+
+Bu işlem sonucunda elde edilen tile'lar, web uygulamasında Leaflet.js kullanılarak sorunsuz bir şekilde görüntülenmektedir.
