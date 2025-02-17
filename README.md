@@ -18,8 +18,6 @@
 - [Kullanım](#-kullanım)
 - [Hava Kalitesi Göstergeleri](#-hava-kalitesi-göstergeleri)
 - [API Dökümantasyonu](#-api-dökümantasyonu)
-- [Katkıda Bulunma](#-katkıda-bulunma)
-- [Lisans](#-lisans)
 
 ## 🎯 Proje Hakkında
 
