@@ -165,3 +165,18 @@ Projemizde hava kalitesi verilerinin görselleştirilmesi için aşağıdaki ad�
    - Veri boyutu ve görsel kalite arasında optimum denge sağlandı
 
 Bu işlem sonucunda elde edilen tile'lar, web uygulamasında Leaflet.js kullanılarak sorunsuz bir şekilde görüntülenmektedir.
+
+## 📱 Uygulama Ekran Görüntüleri
+
+### Giriş Ekranı
+![Login ](https://github.com/user-attachments/assets/d3579f53-d273-4304-9502-34c96a6b0644)
+
+### Raster Ekran
+![ChatBot](https://github.com/user-attachments/assets/da8f59c9-fb3c-44c8-89ae-d46144100d0e)
+
+### Diğer Harita Ekranları
+![Map Interface](https://github.com/user-attachments/assets/7db207b9-fe3f-4410-9fdb-89b6ec19413c)
+![Map Interface](https://github.com/user-attachments/assets/acb0231d-6422-4daf-9cdf-9a7296cfba01)
+
+### Veritabanı Görünümü
+![VeriTabanı]()
